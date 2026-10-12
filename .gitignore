@@ -3,3 +3,5 @@ Thumbs.db
 *.log
 dethi_text.txt
 *.docx
+node_modules/
+*.bak

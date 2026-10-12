@@ -21,6 +21,12 @@ services:
     restart: always
     depends_on:
       - mysql_db
+    environment:
+      - DB_HOST=mysql_db
+      - DB_USER=root
+      - DB_PASSWORD=RootPassword123!
+      - DB_NAME=qlsv_db
+      - PORT=3000
     networks:
       - app-net
 
@@ -83,6 +89,8 @@ services:
     restart: always
     ports:
       - "3000:3000"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
     depends_on:
       - prometheus
     networks:

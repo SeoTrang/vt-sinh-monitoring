@@ -1,12 +1,16 @@
-FROM php:8.1-apache
+FROM node:20-alpine
 
-# Cài đặt extension mysqli để kết nối MySQL
-RUN docker-php-ext-install mysqli && docker-php-ext-enable mysqli
+WORKDIR /app
 
-# Sao chép mã nguồn ứng dụng PHP vào thư mục gốc của Apache
-COPY index.php /var/www/html/
+# Sao chép package.json và cài đặt dependencies
+COPY package*.json ./
+RUN npm install --omit=dev
 
-# Phân quyền cho Apache
-RUN chown -R www-data:www-data /var/www/html
+# Sao chép mã nguồn ứng dụng
+COPY . .
 
-EXPOSE 80
+# Mở cổng 3000 cho ứng dụng Node.js
+EXPOSE 3000
+
+# Khởi chạy server Node.js
+CMD ["node", "server.js"]

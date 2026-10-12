@@ -13,7 +13,7 @@
 Hệ thống được đóng gói và vận hành hoàn toàn trên nền tảng Docker Compose, bao gồm các thành phần sau:
 
 1. **Nginx Reverse Proxy (`nginx_proxy`)**: Đứng ở cổng `80`, tiếp nhận request từ người dùng, thực hiện Hardening Security Headers (`X-Frame-Options`, `X-XSS-Protection`, `X-Content-Type-Options`) và chuyển tiếp tới `web_app`.
-2. **Web Application (`web_app`)**: Ứng dụng Web PHP 8.1 Apache kết nối CSDL, xử lý các thao tác CRUD sinh viên.
+2. **Web Application (`web_app`)**: Ứng dụng Web Node.js (Express.js) kết nối CSDL MySQL, xử lý các thao tác CRUD sinh viên.
 3. **Database Server (`mysql_db`)**: Hệ quản trị CSDL MySQL 8.0, tự động khởi tạo database `qlsv_db` và bảng `sinhvien` qua script `init.sql`.
 4. **Database Admin Tool (`phpmyadmin_tool`)**: Công cụ quản trị CSDL phpMyAdmin trực quan qua giao diện web tại cổng `8080`.
 5. **Hệ thống giám sát (Monitoring Stack)**:
@@ -32,6 +32,10 @@ Hệ thống được đóng gói và vận hành hoàn toàn trên nền tảng
 | **cAdvisor** | `cadvisor_collector` | `8082` | Thu thập metrics tài nguyên container | [http://localhost:8082](http://localhost:8082) |
 | **Prometheus** | `prometheus_monitoring` | `9090` | Máy chủ giám sát và lưu metrics | [http://localhost:9090](http://localhost:9090) |
 | **Grafana** | `grafana_dashboard` | `3000` | Dashboard trực quan hóa số liệu | [http://localhost:3000](http://localhost:3000) |
+
+> 📐 **Giải thích cơ chế hoạt động & kiến trúc hệ thống:** Xem file [**ARCHITECTURE.md**](./ARCHITECTURE.md).  
+> 📌 **Bảng tra cứu đường dẫn & cổng trên Server:** Xem file [**ENDPOINTS.md**](./ENDPOINTS.md).  
+> 📖 **Tài liệu hướng dẫn chi tiết từng dịch vụ:** Xem thư mục [**docs/**](./docs/README.md).
 
 ---
 
