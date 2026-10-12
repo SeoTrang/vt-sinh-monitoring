@@ -19,10 +19,10 @@ Hệ thống được thiết kế theo mô hình **Đa tầng (Multi-tier Archi
 
 ```mermaid
 flowchart TD
-    User[" Người Dùng / Trình Duyệt"]
-    Admin[" Quản Trị Viên"]
+    User["Người Dùng / Trình Duyệt"]
+    Admin["Quản Trị Viên"]
 
-    subgraph HostPorts [" Các Cổng Mở Ra Máy Chủ (Host Ports)"]
+    subgraph HostPorts ["Các Cổng Mở Ra Máy Chủ (Host Ports)"]
         P80["Port 80 (HTTP)"]
         P8080["Port 8080 (phpMyAdmin)"]
         P3000["Port 3000 (Grafana)"]
@@ -30,39 +30,42 @@ flowchart TD
         P9090["Port 9090 (Prometheus)"]
     end
 
-    subgraph DockerNet [" Mạng Nội Bộ Docker (app-net)"]
-        direction TB
-
-        subgraph AppStack [" Khối Ứng Dụng"]
-            Nginx["1. Nginx Reverse Proxy\n(nginx_proxy)\n- Hardening Headers\n- Chuyển tiếp cổng 80 -> 3000"]
-            NodeApp["2. Web App Node.js\n(web_app - Express.js)\n- Xử lý CRUD Sinh viên\n- Tự động xếp loại, thống kê\n- API /health"]
-            MySQL["3. MySQL Server 8.0\n(mysql_db)\n- Database: qlsv_db\n- Bảng: sinhvien\n- Volume: db_data"]
-            PMA["4. phpMyAdmin\n(phpmyadmin_tool)\n- Quản trị CSDL giao diện Web"]
+    subgraph DockerNet ["Mạng Nội Bộ Docker (app-net)"]
+        subgraph AppStack ["Khối Ứng Dụng & Dữ Liệu"]
+            Nginx["1. Nginx Reverse Proxy<br/>(nginx_proxy)<br/>Hardening Security Headers"]
+            NodeApp["2. Web App Node.js<br/>(web_app - Express.js)<br/>CRUD Sinh viên, API /health"]
+            MySQL["3. MySQL Server 8.0<br/>(mysql_db)<br/>Database: qlsv_db, Volume: db_data"]
+            PMA["4. phpMyAdmin<br/>(phpmyadmin_tool)<br/>Quản trị CSDL giao diện Web"]
         end
 
-        subgraph MonitorStack [" Khối Giám Sát (Monitoring Stack)"]
-            cAdv["5. cAdvisor\n(cadvisor_collector)\n- Đọc Docker Engine & cgroups\n- Đo CPU, RAM, Network"]
-            Prom["6. Prometheus\n(prometheus_monitoring)\n- TSDB lưu trữ metrics\n- Scrape mỗi 5 giây"]
-            Graf["7. Grafana\n(grafana_dashboard)\n- Provisioning tự động\n- Trực quan hóa Dashboard"]
+        subgraph MonitorStack ["Khối Giám Sát (Monitoring Stack)"]
+            cAdv["5. cAdvisor<br/>(cadvisor_collector)<br/>Thu thập CPU, RAM, Network"]
+            Prom["6. Prometheus<br/>(prometheus_monitoring)<br/>TSDB lưu trữ Time-Series Metrics"]
+            Graf["7. Grafana<br/>(grafana_dashboard)<br/>Trực quan hóa Dashboard"]
         end
     end
 
     %% Luồng người dùng
-    User -->|Truy cập Website| P80 --> Nginx
+    User -->|Truy cập| P80
+    P80 --> Nginx
     Nginx -->|Reverse Proxy| NodeApp
-    NodeApp -->|Truy vấn SQL (mysql2)| MySQL
+    NodeApp -->|Truy vấn SQL| MySQL
 
     %% Luồng quản trị CSDL
-    Admin -->|Quản trị CSDL| P8080 --> PMA
-    PMA -->|Kết nối quản trị| MySQL
+    Admin -->|Quản trị CSDL| P8080
+    P8080 --> PMA
+    PMA -->|Kết nối MySQL| MySQL
 
     %% Luồng giám sát
     cAdv -.->|Đọc tài nguyên| AppStack
-    Prom -->|Kéo metrics (Scrape 5s)| cAdv
+    Prom -->|Kéo metrics 5s| cAdv
     Graf -->|Truy vấn số liệu| Prom
-    Admin -->|Xem Dashboard| P3000 --> Graf
-    Admin -.->|Xem Metrics thô| P9090 --> Prom
-    Admin -.->|Xem cAdvisor thô| P8082 --> cAdv
+    Admin -->|Xem Dashboard| P3000
+    P3000 --> Graf
+    Admin -.->|Xem Metrics| P9090
+    P9090 -.-> Prom
+    Admin -.->|Xem cAdvisor| P8082
+    P8082 -.-> cAdv
 ```
 
 ---
