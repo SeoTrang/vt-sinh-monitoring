@@ -57,7 +57,7 @@ services:
     networks:
       - app-net
 
-  # --- HỆ THỐNG GIÁM SÁT TOÀN DIỆN (PROMETHEUS + NODE EXPORTER + PROCESS EXPORTER + CADVISOR + GRAFANA) ---
+  # --- HỆ THỐNG GIÁM SÁT TOÀN DIỆN (PROMETHEUS + LOKI + PROMTAIL + NODE EXPORTER + PROCESS EXPORTER + CADVISOR + GRAFANA) ---
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus_monitoring
@@ -66,6 +66,35 @@ services:
       - "9090:9090"
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - app-net
+
+  loki:
+    image: grafana/loki:latest
+    container_name: loki_service
+    restart: always
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./loki/local-config.yaml:/etc/loki/local-config.yaml:ro
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      app-net:
+        aliases:
+          - loki
+
+  promtail:
+    image: grafana/promtail:latest
+    container_name: promtail_collector
+    restart: always
+    volumes:
+      - ./promtail/config.yml:/etc/promtail/config.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/log:/var/log:ro
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
     networks:
       - app-net
 
@@ -131,6 +160,7 @@ services:
       - ./grafana/provisioning:/etc/grafana/provisioning
     depends_on:
       - prometheus
+      - loki
     networks:
       - app-net
 

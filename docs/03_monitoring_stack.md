@@ -7,9 +7,10 @@ Hệ thống giám sát được xây dựng theo mô hình **Toàn diện (Full
 
 1. **Node Exporter (`cổng 9100`):** Đo đạc phần cứng máy chủ vật lý / OS (CPU cores, RAM khả dụng, phân vùng Disk `/`, `/boot`..., trạng thái Server UP/DOWN).
 2. **Process Exporter (`cổng 9256`):** Quét `/proc` của hệ điều hành, phân tích Top tiến trình (Processes) tiêu thụ nhiều CPU và RAM nhất (`mysqld`, `node`, `nginx`, `grafana`...).
-3. **cAdvisor (`cổng 8082`):** Thu thập số liệu hiệu năng chi tiết của các Docker Container ứng dụng (`web_app`, `mysql_db`, `nginx_proxy`...), đã được lọc sạch systemd cgroup rác.
-4. **Prometheus Server (`cổng 9090`):** Máy chủ lưu trữ Time-Series Database (TSDB), định kỳ mỗi 5 giây thu thập dữ liệu (scrape) từ 3 exporter trên.
-5. **Grafana (`cổng 3000`):** Nền tảng trực quan hóa số liệu thành Dashboard giám sát chuẩn Enterprise thời gian thực.
+3. **cAdvisor (`cổng 8082`):** Thu thập số liệu hiệu năng chi tiết của các Docker Container ứng dụng (`web_app`, `mysql_db`, `nginx_proxy`...).
+4. **Loki (`cổng 3100`) & Promtail:** Hệ thống gom và lưu trữ nhật ký Log hệ thống thời gian thực (Log aggregation & streaming).
+5. **Prometheus Server (`cổng 9090`):** Máy chủ lưu trữ Time-Series Database (TSDB), định kỳ mỗi 5 giây thu thập dữ liệu (scrape) từ các exporter.
+6. **Grafana (`cổng 3000`):** Nền tảng trực quan hóa số liệu và log thành Dashboard giám sát chuẩn Enterprise thời gian thực.
 
 ---
 

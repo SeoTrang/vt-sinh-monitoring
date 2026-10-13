@@ -359,8 +359,8 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "type": "loki",
+        "uid": "loki"
       },
       "fieldConfig": {
         "defaults": {
@@ -372,11 +372,11 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "blue",
+                "color": "green",
                 "value": null
               },
               {
-                "color": "green",
+                "color": "red",
                 "value": 1
               }
             ]
@@ -409,17 +409,17 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "type": "loki",
+            "uid": "loki"
           },
           "editorMode": "code",
-          "expr": "count(count by (name) (container_last_seen{name=~\".+\"}))",
+          "expr": "sum(count_over_time({server=~\".+\"} |~ \"(?i)error|fail|exception\" [1h])) or vector(0)",
           "instant": true,
           "range": false,
           "refId": "A"
         }
       ],
-      "title": "Containers UP",
+      "title": "Log lỗi 1h",
       "type": "stat"
     },
     {
@@ -888,6 +888,55 @@
       ],
       "title": "Lưu Lượng Mạng Containers (RX / TX)",
       "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 32
+      },
+      "id": 104,
+      "title": "NHẬT KÝ HỆ THỐNG & LOG TIẾN TRÌNH THỜI GIAN THỰC (LOKI LOGS)",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 33
+      },
+      "id": 40,
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showLabels": true,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "editorMode": "code",
+          "expr": "{server=~\".+\"}",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "Live Logs Viewer (Toàn bộ Log Máy chủ & Containers)",
+      "type": "logs"
     }
   ],
   "refresh": "5s",
@@ -897,7 +946,8 @@
     "monitoring",
     "server",
     "docker",
-    "process"
+    "process",
+    "loki"
   ],
   "time": {
     "from": "now-15m",
@@ -923,5 +973,5 @@
   "timezone": "browser",
   "title": "Giám Sát Hệ Thống Server & Docker Containers - DTC241200007",
   "uid": "docker-monitoring-dtc241200007",
-  "version": 3
+  "version": 4
 }
