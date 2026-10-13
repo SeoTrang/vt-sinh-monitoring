@@ -26,8 +26,10 @@ flowchart TD
         P80["Port 80 (HTTP)"]
         P8080["Port 8080 (phpMyAdmin)"]
         P3000["Port 3000 (Grafana)"]
-        P8082["Port 8082 (cAdvisor)"]
         P9090["Port 9090 (Prometheus)"]
+        P9100["Port 9100 (Node Exporter)"]
+        P9256["Port 9256 (Process Exporter)"]
+        P8082["Port 8082 (cAdvisor)"]
     end
 
     subgraph DockerNet ["Mạng Nội Bộ Docker (app-net)"]
@@ -38,10 +40,12 @@ flowchart TD
             PMA["4. phpMyAdmin<br/>(phpmyadmin_tool)<br/>Quản trị CSDL giao diện Web"]
         end
 
-        subgraph MonitorStack ["Khối Giám Sát (Monitoring Stack)"]
-            cAdv["5. cAdvisor<br/>(cadvisor_collector)<br/>Thu thập CPU, RAM, Network"]
-            Prom["6. Prometheus<br/>(prometheus_monitoring)<br/>TSDB lưu trữ Time-Series Metrics"]
-            Graf["7. Grafana<br/>(grafana_dashboard)<br/>Trực quan hóa Dashboard"]
+        subgraph MonitorStack ["Khối Giám Sát Toàn Diện (Full-stack Observability)"]
+            NodeExp["5. Node Exporter<br/>(node_exporter)<br/>Phần cứng Máy chủ Host"]
+            ProcExp["6. Process Exporter<br/>(process_exporter)<br/>Top Tiến trình /proc"]
+            cAdv["7. cAdvisor<br/>(cadvisor_collector)<br/>Docker Container Metrics"]
+            Prom["8. Prometheus<br/>(prometheus_monitoring)<br/>TSDB lưu trữ Time-Series Metrics"]
+            Graf["9. Grafana<br/>(grafana_dashboard)<br/>Trực quan hóa Dashboard"]
         end
     end
 
@@ -57,15 +61,14 @@ flowchart TD
     PMA -->|Kết nối MySQL| MySQL
 
     %% Luồng giám sát
-    cAdv -.->|Đọc tài nguyên| AppStack
-    Prom -->|Kéo metrics 5s| cAdv
-    Graf -->|Truy vấn số liệu| Prom
+    NodeExp -.->|Thu thập CPU, RAM, Disk Host| Prom
+    ProcExp -.->|Thu thập Top Process CPU/RAM| Prom
+    cAdv -.->|Thu thập Container Metrics| Prom
+    Prom -->|Kéo metrics 5s| Graf
     Admin -->|Xem Dashboard| P3000
     P3000 --> Graf
     Admin -.->|Xem Metrics| P9090
     P9090 -.-> Prom
-    Admin -.->|Xem cAdvisor| P8082
-    P8082 -.-> cAdv
 ```
 
 ---

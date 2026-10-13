@@ -1,23 +1,11 @@
 {
   "annotations": {
-    "list": [
-      {
-        "builtIn": 1,
-        "datasource": {
-          "type": "grafana",
-          "uid": "-- Grafana --"
-        },
-        "enable": true,
-        "hide": true,
-        "name": "Annotations & Alerts",
-        "type": "dashboard"
-      }
-    ]
+    "list": []
   },
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
-  "id": null,
+  "id": 1,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -30,7 +18,7 @@
         "y": 0
       },
       "id": 100,
-      "title": "THỐNG KÊ TỔNG QUAN HỆ THỐNG",
+      "title": "THỐNG KÊ TỔNG QUAN HỆ THỐNG MÁY CHỦ & TIẾN TRÌNH",
       "type": "row"
     },
     {
@@ -58,13 +46,13 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 8,
+        "w": 4,
         "x": 0,
         "y": 1
       },
       "id": 1,
       "options": {
-        "colorMode": "value",
+        "colorMode": "background",
         "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto",
@@ -85,13 +73,13 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "count(count by (id) (container_last_seen))",
+          "expr": "count(up{job=\"node-exporter\"} == 1) or vector(0)",
           "instant": true,
           "range": false,
           "refId": "A"
         }
       ],
-      "title": "Tổng số Containers đang chạy",
+      "title": "Server UP",
       "type": "stat"
     },
     {
@@ -109,33 +97,28 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "blue",
+                "color": "green",
                 "value": null
               },
               {
-                "color": "orange",
-                "value": 1073741824
-              },
-              {
                 "color": "red",
-                "value": 2147483648
+                "value": 1
               }
             ]
-          },
-          "unit": "bytes"
+          }
         },
         "overrides": []
       },
       "gridPos": {
         "h": 4,
-        "w": 8,
-        "x": 8,
+        "w": 4,
+        "x": 4,
         "y": 1
       },
       "id": 2,
       "options": {
-        "colorMode": "value",
-        "graphMode": "area",
+        "colorMode": "background",
+        "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto",
         "reduceOptions": {
@@ -155,13 +138,13 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "sum(container_memory_usage_bytes)",
-          "instant": false,
-          "range": true,
+          "expr": "(count(up{job=\"node-exporter\"} == 0) or vector(0))",
+          "instant": true,
+          "range": false,
           "refId": "A"
         }
       ],
-      "title": "Tổng dung lượng RAM sử dụng",
+      "title": "Server DOWN",
       "type": "stat"
     },
     {
@@ -184,11 +167,11 @@
               },
               {
                 "color": "yellow",
-                "value": 50
+                "value": 60
               },
               {
                 "color": "red",
-                "value": 80
+                "value": 85
               }
             ]
           },
@@ -198,14 +181,14 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 8,
-        "x": 16,
+        "w": 4,
+        "x": 8,
         "y": 1
       },
       "id": 3,
       "options": {
-        "colorMode": "value",
-        "graphMode": "area",
+        "colorMode": "background",
+        "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto",
         "reduceOptions": {
@@ -225,13 +208,218 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "sum(rate(container_cpu_usage_seconds_total[1m])) * 100",
-          "instant": false,
-          "range": true,
+          "expr": "100 - (avg(rate(node_cpu_seconds_total{mode=\"idle\"}[1m])) * 100)",
+          "instant": true,
+          "range": false,
           "refId": "A"
         }
       ],
-      "title": "Tổng tải CPU (%)",
+      "title": "CPU TB",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 85
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 12,
+        "y": 1
+      },
+      "id": 4,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "editorMode": "code",
+          "expr": "100 * (1 - (sum(node_memory_MemAvailable_bytes) / sum(node_memory_MemTotal_bytes)))",
+          "instant": true,
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "RAM TB",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 85
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 16,
+        "y": 1
+      },
+      "id": 5,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "editorMode": "code",
+          "expr": "max(100 - ((node_filesystem_avail_bytes{fstype!~\"rootfs|tmpfs|overlay|iso9660\"} / node_filesystem_size_bytes{fstype!~\"rootfs|tmpfs|overlay|iso9660\"}) * 100))",
+          "instant": true,
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Disk cao nhất",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 20,
+        "y": 1
+      },
+      "id": 6,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "editorMode": "code",
+          "expr": "count(count by (name) (container_last_seen{name=~\".+\"}))",
+          "instant": true,
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "Containers UP",
       "type": "stat"
     },
     {
@@ -243,7 +431,176 @@
         "y": 5
       },
       "id": 101,
-      "title": "CHI TIẾT HIỆU NĂNG TỪNG CONTAINER",
+      "title": "HIỆU NĂNG PHẦN CỨNG MÁY CHỦ THEO SERVER",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 15
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 6
+      },
+      "id": 10,
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "last",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "editorMode": "code",
+          "expr": "100 - (avg by (instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[1m])) * 100)",
+          "legendFormat": "{{instance}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "CPU % theo server",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 15
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 6
+      },
+      "id": 11,
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "last"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "editorMode": "code",
+          "expr": "100 * (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes))",
+          "legendFormat": "{{instance}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "RAM % theo server",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 15
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 6
+      },
+      "id": 12,
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "last"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "editorMode": "code",
+          "expr": "100 - ((node_filesystem_avail_bytes{fstype!~\"rootfs|tmpfs|overlay|iso9660\"} / node_filesystem_size_bytes{fstype!~\"rootfs|tmpfs|overlay|iso9660\"}) * 100)",
+          "legendFormat": "{{instance}} {{mountpoint}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Disk % theo mountpoint",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 14
+      },
+      "id": 102,
+      "title": "CHI TIẾT TIẾN TRÌNH HỆ THỐNG (TOP PROCESS MONITORING)",
       "type": "row"
     },
     {
@@ -267,9 +624,126 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 6
+        "y": 15
       },
-      "id": 4,
+      "id": 20,
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "last",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "editorMode": "code",
+          "expr": "topk(10, rate(namedprocess_namegroup_cpu_seconds_total[1m]) * 100)",
+          "legendFormat": "{{groupname}} | {{instance}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Top process CPU",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 15
+          },
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 15
+      },
+      "id": 21,
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "last"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "editorMode": "code",
+          "expr": "topk(10, namedprocess_namegroup_memory_bytes{memtype=\"resident\"})",
+          "legendFormat": "{{groupname}} | {{instance}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Top process RAM",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 23
+      },
+      "id": 103,
+      "title": "CHI TIẾT HIỆU NĂNG TỪNG CONTAINER ỨNG DỤNG",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 15
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 24
+      },
+      "id": 30,
       "options": {
         "legend": {
           "displayMode": "table",
@@ -290,8 +764,8 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "topk(10, sum(rate(container_cpu_usage_seconds_total[1m])) by (name, id) * 100)",
-          "legendFormat": "{{name}} {{id}}",
+          "expr": "topk(10, sum(rate(container_cpu_usage_seconds_total{name=~\".+\"}[1m])) by (name) * 100)",
+          "legendFormat": "{{name}}",
           "range": true,
           "refId": "A"
         }
@@ -318,17 +792,17 @@
       },
       "gridPos": {
         "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 6
+        "w": 8,
+        "x": 8,
+        "y": 24
       },
-      "id": 5,
+      "id": 31,
       "options": {
         "legend": {
           "displayMode": "table",
           "placement": "bottom",
           "calcs": [
-            "lastNotNull",
+            "last",
             "max"
           ]
         },
@@ -343,8 +817,8 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "topk(10, sum(container_memory_usage_bytes) by (name, id))",
-          "legendFormat": "{{name}} {{id}}",
+          "expr": "topk(10, sum(container_memory_usage_bytes{name=~\".+\"}) by (name))",
+          "legendFormat": "{{name}}",
           "range": true,
           "refId": "A"
         }
@@ -363,26 +837,25 @@
             "drawStyle": "line",
             "lineInterpolation": "smooth",
             "lineWidth": 2,
-            "fillOpacity": 10
+            "fillOpacity": 15
           },
-          "unit": "Bps"
+          "unit": "binBps"
         },
         "overrides": []
       },
       "gridPos": {
         "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 14
+        "w": 8,
+        "x": 16,
+        "y": 24
       },
-      "id": 6,
+      "id": 32,
       "options": {
         "legend": {
           "displayMode": "table",
           "placement": "bottom",
           "calcs": [
-            "mean",
-            "max"
+            "last"
           ]
         },
         "tooltip": {
@@ -396,66 +869,24 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "sum(rate(container_network_receive_bytes_total[1m])) by (interface)",
-          "legendFormat": "{{interface}} - RX",
+          "expr": "sum(rate(container_network_receive_bytes_total{name=~\".+\"}[1m])) by (name)",
+          "legendFormat": "{{name}} (RX Nhận)",
           "range": true,
           "refId": "A"
-        }
-      ],
-      "title": "Lưu lượng Mạng Nhận (Network Traffic In / RX)",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "drawStyle": "line",
-            "lineInterpolation": "smooth",
-            "lineWidth": 2,
-            "fillOpacity": 10
-          },
-          "unit": "Bps"
         },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 14
-      },
-      "id": 7,
-      "options": {
-        "legend": {
-          "displayMode": "table",
-          "placement": "bottom",
-          "calcs": [
-            "mean",
-            "max"
-          ]
-        },
-        "tooltip": {
-          "mode": "multi"
-        }
-      },
-      "targets": [
         {
           "datasource": {
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "sum(rate(container_network_transmit_bytes_total[1m])) by (interface)",
-          "legendFormat": "{{interface}} - TX",
+          "expr": "sum(rate(container_network_transmit_bytes_total{name=~\".+\"}[1m])) by (name)",
+          "legendFormat": "{{name}} (TX Gửi)",
           "range": true,
-          "refId": "A"
+          "refId": "B"
         }
       ],
-      "title": "Lưu lượng Mạng Gửi (Network Traffic Out / TX)",
+      "title": "Lưu Lượng Mạng Containers (RX / TX)",
       "type": "timeseries"
     }
   ],
@@ -463,9 +894,10 @@
   "schemaVersion": 38,
   "style": "dark",
   "tags": [
+    "monitoring",
+    "server",
     "docker",
-    "cadvisor",
-    "monitoring"
+    "process"
   ],
   "time": {
     "from": "now-15m",
@@ -478,10 +910,18 @@
       "30s",
       "1m",
       "5m"
+    ],
+    "time_options": [
+      "5m",
+      "15m",
+      "1h",
+      "6h",
+      "12h",
+      "24h"
     ]
   },
   "timezone": "browser",
-  "title": "Giám Sát Hệ Thống Docker Containers - DTC241200007",
+  "title": "Giám Sát Hệ Thống Server & Docker Containers - DTC241200007",
   "uid": "docker-monitoring-dtc241200007",
-  "version": 1
+  "version": 3
 }

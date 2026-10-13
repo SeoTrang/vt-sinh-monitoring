@@ -15,8 +15,10 @@ Khi hệ thống được khởi chạy qua Docker Compose, các dịch vụ s�
 | **Ứng dụng Quản lý Sinh viên** | `nginx_proxy` & `web_app` | **`80`** | [http://localhost](http://localhost) | `http://<IP_SERVER>` | *Không cần đăng nhập* |
 | **phpMyAdmin** | `phpmyadmin_tool` | **`8080`** | [http://localhost:8080](http://localhost:8080) | `http://<IP_SERVER>:8080` | **Server:** `mysql_db`<br>**User:** `root`<br>**Password:** `RootPassword123!` |
 | **Grafana Dashboard** | `grafana_dashboard` | **`3000`** | [http://localhost:3000](http://localhost:3000) | `http://<IP_SERVER>:3000` | **User:** `admin`<br>**Password:** `admin` |
-| **cAdvisor Metrics** | `cadvisor_collector` | **`8082`** | [http://localhost:8082](http://localhost:8082) | `http://<IP_SERVER>:8082` | *Không cần đăng nhập* |
 | **Prometheus Server** | `prometheus_monitoring` | **`9090`** | [http://localhost:9090](http://localhost:9090) | `http://<IP_SERVER>:9090` | *Không cần đăng nhập* |
+| **Node Exporter (Host/Server)** | `node_exporter` | **`9100`** | [http://localhost:9100](http://localhost:9100/metrics) | `http://<IP_SERVER>:9100/metrics` | *Không cần đăng nhập* |
+| **Process Exporter (Tiến trình)** | `process_exporter` | **`9256`** | [http://localhost:9256](http://localhost:9256/metrics) | `http://<IP_SERVER>:9256/metrics` | *Không cần đăng nhập* |
+| **cAdvisor Metrics (Container)** | `cadvisor_collector` | **`8082`** | [http://localhost:8082](http://localhost:8082) | `http://<IP_SERVER>:8082` | *Không cần đăng nhập* |
 | **MySQL Database** | `mysql_db` | `3306` *(nội bộ)* | *Chỉ kết nối nội bộ trong Docker* | *Chỉ kết nối nội bộ trong Docker* | **Database:** `qlsv_db`<br>**User:** `root`<br>**Password:** `RootPassword123!` |
 | **Node.js Web App** | `web_app` | `3000` *(nội bộ)* | *Được Nginx Reverse Proxy bảo vệ* | *Được Nginx Reverse Proxy bảo vệ* | *Health check:* `http://localhost/health` |
 
@@ -35,9 +37,13 @@ Khi hệ thống được khởi chạy qua Docker Compose, các dịch vụ s�
       │
       ├── Cổng 3000 ────────► [ Grafana Dashboard ] ───(nội bộ: 9090)──► [ Prometheus ]
       │                                                                        │
-      ├── Cổng 9090 ────────► [ Prometheus Server ]  ◄──(nội bộ: 8080)── [ cAdvisor ]
-      │                                                                        │
-      └── Cổng 8082 ────────► [ cAdvisor UI ] ────────────────────────► [ Thu thập Docker Engine ]
+      ├── Cổng 9090 ────────► [ Prometheus Server ]  ◄──(nội bộ: 9100)── [ Node Exporter (Server) ]
+      │                                              ◄──(nội bộ: 9256)── [ Process Exporter (Processes) ]
+      │                                              ◄──(nội bộ: 8080)── [ cAdvisor (Containers) ]
+      │
+      ├── Cổng 9100 ────────► [ Node Exporter Metrics ]
+      ├── Cổng 9256 ────────► [ Process Exporter Metrics ]
+      └── Cổng 8082 ────────► [ cAdvisor UI ]
 ```
 
 ---
@@ -49,10 +55,10 @@ Khi hệ thống được khởi chạy qua Docker Compose, các dịch vụ s�
   * Trả về JSON: `{"status":"OK","runtime":"Node.js","timestamp":"..."}`
 * **Kiểm tra Prometheus Targets:**
   * URL: [http://localhost:9090/targets](http://localhost:9090/targets)
-  * Trạng thái mục `cadvisor` phải hiển thị **UP** (màu xanh).
+  * Cả 4 mục: `node-exporter`, `process-exporter`, `cadvisor`, `prometheus` đều hiển thị **UP** (màu xanh).
 * **Truy cập Dashboard Grafana:**
   * URL trực tiếp: [http://localhost:3000/dashboards](http://localhost:3000/dashboards)
-  * Thư mục: **Monitoring** $\rightarrow$ Dashboard: **"Giám Sát Hệ Thống Docker Containers - DTC241200007"**.
+  * Thư mục: **Monitoring** $\rightarrow$ Dashboard: **"Giám Sát Hệ Thống Server & Docker Containers - DTC241200007"**.
 
 ---
 
